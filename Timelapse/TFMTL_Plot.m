@@ -5,7 +5,7 @@ function out=TFMTL_Plot(samp)
 
 n = 0;
 
-for i = [1:28]
+for i = [1:30]
 close all
 load([samp,'-T',num2str(i+n),'.mat']);
 sdata=load([samp,'-T',num2str(i+n),'.mat']);
@@ -62,7 +62,7 @@ NetMoment=trace(mtrs);
 A = figure;
 imshow(sdata.cimg,[]);
 hold on,
-quiver(sdata.xgrid,sdata.ygrid,sdata.xdisp,sdata.ydisp,'c');
+quiver(xn,yn,dxn,dyn,'c');
 plot(cellTrace(:,1),cellTrace(:,2),'r','LineWidth',2);
 hold off
 saveas(A,[samp,'-T',num2str(i+n),'disp'],'png');

@@ -16,7 +16,10 @@ function outp=TFM_solve3(samp,varargin)
 if nargin == 0
     disp('Not enough input arguments, need .mat file')
 elseif nargin == 1
-    boundary_constraint = 1;
+    boundary_constraint=input('boundary_contraint [1:Yes,2:No]');
+    if isempty(boundary_constraint)
+        boundary_constraint = 1;
+    end
 elseif nargin == 2
     if not(or(varargin{1} == 0,varargin{1} == 1))
         disp('wrong input type')

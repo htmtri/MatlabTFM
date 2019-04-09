@@ -4,7 +4,7 @@ function sdata=TFMTL_Prep3(samp)
 NulImg=uigetfile('*.TIFF','Pick after trypsin image');
 b_org=imread(NulImg);
 % b_org=imread('af - Position 1_T0_C0.tiff');
-b = bpass(b_org,1,10,0.05*mode(b_org(:)));
+b = bpass(b_org,0,7,0.05*mode(b_org(:)));
 
 FileTif=uigetfile('*.TIF', 'Pick before trysin Image Stack');
 InfoImage=imfinfo(FileTif);
@@ -34,7 +34,7 @@ for i = [1:NumberImages]
     
     %     a_org=imread(FinalImage(:,:,i));
     a_org=FinalImage(:,:,i);
-    a = bpass(a_org,1,10,0.05*mode(a_org(:)));
+    a = bpass(a_org,0,7,0.05*mode(a_org(:)));
     
     loadimg=imcrop(a,rect);
     

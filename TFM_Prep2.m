@@ -40,8 +40,8 @@ b_org=imread([pathname,fileb]);
 
 %Bandpass Filter Beads Img for better SNR
 
-a=bpass(a_org,1,10,0.05*mode(a_org(:))); %bpass(im,noise[0/1],fsize [10 for 0.1um],threshold
-b=bpass(b_org,1,10,0.05*mode(b_org(:))); 
+a=bpass(a_org,0,10,0.05*mode(a_org(:))); %bpass(im,noise[0/1],fsize [6-9 for 0.1um],threshold)
+b=bpass(b_org,0,10,0.05*mode(b_org(:))); 
 
 % %%make a colored image using loaded as red,unloaded as green to show bead shifts
 % cimg(:,:,1)=double(a)/max(double(a(:)));

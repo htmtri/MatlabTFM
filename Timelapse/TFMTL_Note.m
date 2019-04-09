@@ -2,7 +2,7 @@ function out=TFMTL_Note(samp)
 n = 0;
 
 j = 1;
-k = 1;
+k = 30;
 %% PRNSOL
 disp('Count those lines not for nodal displacements at the end of ANSYS solution file PRNSOL**.txt')
 system(['NOTEPAD.exe PRNSOL_',samp,'-T',num2str(j+n),'.txt'])

@@ -22,7 +22,7 @@ if isempty(boundary_constraint)
     boundary_constraint = 1;
 end
 
-for i = [1:28]
+for i = [1:30]
     
     load([samp,'-T',num2str(i+n),'.mat']);
     homedrive = 'C';
@@ -120,7 +120,7 @@ for i = [1:28]
     end
     
     
-    ansysbatch=writeAnsysCommand([samp,'-T',num2str(i+n)],version,24) %2nd param is the version number, 3rd param is the number of cores
+    ansysbatch=writeAnsysCommand([samp,'-T',num2str(i+n)],homedrive,version,24) %2nd param is the version number, 3rd param is the number of cores
     
     % OLD CODE
     % Run Ansys to solve for traction force. You may need to modify the command

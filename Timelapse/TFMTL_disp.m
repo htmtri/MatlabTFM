@@ -4,7 +4,7 @@ function outp=TFMTL_disp(samp)
 % tic
 n = 0;
 
-for i=[1:28]
+for i=[1:30]
     
     load([samp,'-T',num2str(i+n),'.mat']);
     
@@ -23,7 +23,7 @@ for i=[1:28]
     
     
     %PIV code to get the bead displ
-    [xi,yi,iu,iv,D]=mpiv(nulfimg,loadimg,48,48,0.5,0.5,11,11,1,'mqd',1,0); %img1,img2,xsize,ysize,xoverlap,yoverlap,xmax,ymax,dt,type,recur,plot
+    [xi,yi,iu,iv,D]=mpiv(nulfimg,loadimg,36,36,0.5,0.5,11,11,1,'mqd',1,0); %img1,img2,xsize,ysize,xoverlap,yoverlap,xmax,ymax,dt,type,recur,plot
     [iu_f,iv_f,iu_s, iv_s] = mpiv_filter(iu,iv, 2, 3.0, 3, 0); %iu,iv,filter 2= median, std_stray, interpolation, plot
     [iu_i, iv_i] = mpiv_smooth(iu_s, iv_s, 0);
     

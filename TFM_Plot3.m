@@ -1,7 +1,8 @@
 function out=TFM_Plot3(samp)
 %%2018 Minh modified
-% 2018/08 revision: read force directly from PRNLD file (using reaction force)
-% instead of construct force from stress and area value
+% 2018/08 revision: solving for force using PRNLD file (reaction force)
+% instead of construct force from stress and area value. Displacement is
+% also reconstruct using PRNSOL_U
 %%
 % display a message to remind user modify the output file from Ansys and
 % uses notepad to edit
@@ -53,24 +54,28 @@ Incell=inpolygon(xn,yn,xcell,ycell);
 index_cell=find(Incell==1);
 out_cell=find(Incell==0);
 
-figure
-imshow(cimg,[])
-hold on
+% figure
+% imshow(cimg,[])
+% hold on
 % quiver(sdata.xgrid,sdata.ygrid,sdata.xdisp*scale,sdata.ydisp*scale,'c')
 % quiver(xn(out_cell),yn(out_cell),dxn(out_cell),dyn(out_cell),'m')
 % quiver(xn(out_cell),yn(out_cell),Dxn(out_cell),Dyn(out_cell),'r')
 % quiver(xn(out_cell),yn(out_cell),Dxn(out_cell)-dxn(out_cell),Dyn(out_cell)-dyn(out_cell),'y')
-quiver(xn,yn,dxn,dyn,'m')
-quiver(xn,yn,Dxn,Dyn,'r')
-quiver(xn,yn,Dxn-dxn,Dyn-dyn,'y')
-plot(cellTrace(:,1),cellTrace(:,2),'r','LineWidth',2);
-hold off
+% quiver(xn,yn,dxn,dyn,'m')
+% quiver(xn,yn,Dxn,Dyn,'r')
+% quiver(xn,yn,Dxn-dxn,Dyn-dyn,'y')
+% plot(cellTrace(:,1),cellTrace(:,2),'r','LineWidth',2);
+% hold off
 
 %Mean Displacement, Mean Stress
-D1=sqrt((dxn(out_cell)).^2+(dyn(out_cell)).^2);
-D2=sqrt((Dxn(out_cell)-dxn(out_cell)).^2+(Dyn(out_cell)-dyn(out_cell)).^2)./(D1+1e-15);
-everythin=[xn yn dxn dyn Dxn Dyn sqrt((Dxn-dxn).^2+(Dyn-dyn).^2) sqrt(dxn.^2+dyn.^2)];
+% D1=sqrt((dxn(out_cell)).^2+(dyn(out_cell)).^2);
+% D2=sqrt((Dxn(out_cell)-dxn(out_cell)).^2+(Dyn(out_cell)-dyn(out_cell)).^2)./(D1+1e-15);
+% everythin=[xn yn dxn dyn Dxn Dyn sqrt((Dxn-dxn).^2+(Dyn-dyn).^2) sqrt(dxn.^2+dyn.^2)];
+
+D1=sqrt((dxn).^2+(dyn).^2);
+D2=sqrt((Dxn).^2+(Dyn).^2);
 Avgdisp=mean(D1);
+Avgdispsol=mean(D2);
 
 %StrainEnergy
 SE = Area.*sum(dxn.*sxz + dyn.*syz)/2;
@@ -80,15 +85,15 @@ mtrs=[sum(xnn.*sxz) (sum(xnn.*syz)+sum(ynn.*sxz))/2;(sum(xnn.*syz)+sum(ynn.*sxz)
 NetMoment=trace(mtrs);
 
 %plot displacement result
-A = figure;
+A = figure();
 imshow(cimg,[]);
 hold on,
-quiver(xgrid,ygrid,xdisp,ydisp,'c');
+quiver(xn,yn,dxn,dyn,'c');
 plot(cellTrace(:,1),cellTrace(:,2),'r','LineWidth',2);
 hold off
 
 %plot stress result
-B = figure;
+B = figure();
 imshow(cellimg,[]);
 hold on,
 % quiver(xn,yn,sxz,syz,'y');
@@ -105,7 +110,7 @@ my=max(yn);
 [xssm,yssm]=meshgrid([0:mx],[0:my]);
 % zmsh=griddata(xn,yn,S1,xssm,yssm);
 zmsh=griddata(xn,yn,R1,xssm,yssm);
-C = figure;
+C = figure();
 imagesc(zmsh);colormap(jet);colorbar;
 hold on, plot(cellTrace(:,1),cellTrace(:,2),'w','LineWidth',2);
 % quiver(xgrid,ygrid,xdisp,ydisp,'c', 'Autoscale', 'off');
@@ -115,6 +120,7 @@ set(cbar, 'fontsize', 20);
 
 % Results report
 sdata.AvgDisp=Avgdisp;
+sdata.AvgDispSol=Avgdispsol;
 sdata.MaxDisp=max(D1);
 sdata.xn=xn;
 sdata.yn=yn;
