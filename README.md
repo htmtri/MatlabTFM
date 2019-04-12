@@ -34,16 +34,20 @@ This function will call mpiv to perform cross correlation between loaded and nul
 - TFM_solve(argin1): Get ANSYS model and solving command. input: name of the output file. Contruct ANSYS model file for the ECM and create nodes for FEM solving.
 output: ANSYS model/solver/log files and ANSYS call cmd (.bat) file. Execute .bat file to call ANSYS to solve for traction stress.
 	- ver2 align displacement field correctly with stress node to reduce the amount of interpolation
-	- ver3 include option to solve only for nodes inside ROI rather than the whole map).
+	- ver3 include option to solve only for nodes inside ROI rather than the whole map.
 
 - TFM_Plot(argin1): Plot result input: name of the output file. Read ANSYS output. Plot result displacement and stressmap.
 output: add stress, force result to struct file.
 	- ver2 include more calculated data and more plots.
-	- ver3 include reconstruction of displacement from stress and reaction force from contractile stress
+	- ver3 include reconstruction of displacement from stress and reaction force from contractile stress.
 
 ## Module 2: Timelapse TFM
-
-TFMTL
+- TFMTL_Trace(argin1)
+- TFMTL_Prep(argin1)
+- TFMTL_disp(argin1)
+- TFMTL_solve(argin1)
+- TFMTL_Note(argin1)
+- TFMTL_Plot(argin1)
 
 ## Module 3: Paranoma TFM
 
