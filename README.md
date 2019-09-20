@@ -57,13 +57,17 @@ output: add stress, force result to struct file.
 ## Module 2: Timelapse TFM
 
 - TFMTL_Trace(argin1)
+- TFMTL_Trace4(argin1)
+- FTFMTL_Trace(argin1)
 - TFMTL_Prep(argin1)
+- TFMTL_Prep3(argin1)
 - TFMTL_disp(argin1)
+- TFMTL_disp2(argin1)
 - TFMTL_solve(argin1)
 - TFMTL_Note(argin1)
 - TFMTL_Plot(argin1)
 
-*** Todo: Adapt code for parallel PIV to reduce time. Autotrace module for fluorescent cells. 
+*** Todo: Adapt code for parallel PIV to reduce time. Problem: matfile parallel save. Read https://www.mathworks.com/matlabcentral/answers/307763-how-to-update-variable-within-a-matfile-inside-a-parfor-loop 
 *** Possible for ANSYS parallel analysis??
 
 ## Module 3: Paranoma TFM
