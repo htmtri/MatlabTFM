@@ -70,25 +70,27 @@ output: add stress, force result to struct file.
 
 ## Module 2: Timelapse TFM
 
-- TFMTL_Trace(argin1)
+- TFMTL_Trace3(argin1)
 
 - TFMTL_Trace4(argin1)
 
 - FTFMTL_Trace(argin1)
 
-- TFMTL_Prep(argin1)
-
 - TFMTL_Prep3(argin1)
+
+- TFMTL_Prep4(argin1) - parallel
 
 - TFMTL_disp(argin1)
 
-- TFMTL_disp2(argin1):
+- TFMTL_disp2(argin1) - parallel
 
 - TFMTL_solve(argin1)
 
 - TFMTL_Note(argin1)
 
 - TFMTL_Plot(argin1)
+
+- TFMTL_Plot2(argin1) - parallel
 
 *** Todo: Adapt code for parallel PIV to reduce time. Problem: matfile parallel save. Read https://www.mathworks.com/matlabcentral/answers/307763-how-to-update-variable-within-a-matfile-inside-a-parfor-loop 
 *** Possible for ANSYS parallel analysis??
