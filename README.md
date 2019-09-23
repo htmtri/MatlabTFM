@@ -22,7 +22,7 @@ traction force microscopy. Methods in Cell Biology, volume 123, 2014
 
  - Solving by discretization : 
  	+ Boundary Element Method (BEM): Micah Dembo, Yu-Li Wang, Stresses at the cell-to-substrate interface during locomotion of fibroblasts, Biophys. J. 76 (1999) 2307–2316.
- 	+ Finite Element Method (BEM): D. Ambrosi, Cellular traction as an inverse problem, SIAM J. Appl. Math. 66 (2006)
+ 	+ Finite Element Method (FEM): D. Ambrosi, Cellular traction as an inverse problem, SIAM J. Appl. Math. 66 (2006)
 
 # Usage
 
