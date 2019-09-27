@@ -22,7 +22,7 @@ TifLink.close();
 
 % list = ['bf' num2str(m) ' - Position 1_T'];
 
-for i = [1:NumberImages]
+for i=1:NumberImages
     load([samp,'-T',num2str(i),'.mat']);
     
     sdata = matfile([samp,'-T',num2str(i),'.mat'],'Writable',true);
@@ -43,9 +43,13 @@ for i = [1:NumberImages]
     if rect(2)+yd+rect(4)<size(b,1)
         nulfimg=imcrop(b,rect+[xd yd 0 0]);
         %cut image
-        csimg(:,:,1)=double(loadimg)/max(double(loadimg(:)));
-        csimg(:,:,2)=double(nulfimg)/max(double(nulfimg(:)));
-        csimg(:,:,3)=zeros(size(nulfimg));
+        cimg(:,:,3)=zeros(size(loadimg));
+        tempr=double(loadimg)/(mean(double(loadimg(:)))+5*std(double(loadimg(:))));
+        tempg=double(nulfimg)/(mean(double(nulfimg(:)))+5*std(double(nulfimg(:))));
+        tempr(tempr>1)=1;
+        tempg(tempg>1)=1;
+        cimg(:,:,1)=tempr;
+        cimg(:,:,2)=tempg;
         close all;
     else
         sdata=0;
@@ -53,7 +57,7 @@ for i = [1:NumberImages]
     end
     % Draw cell edge
     if exist('cellTrace','var')
-        figure, imshow(csimg,[])
+        figure, imshow(cimg,[])
         hold on
         plot(cellTrace(:,1),cellTrace(:,2),'r.')
         hold off
@@ -87,6 +91,7 @@ for i = [1:NumberImages]
         hold off
     end
     
+    sdata.cimg=cimg;
     sdata.loadimg=loadimg;
     sdata.nulfimg=nulfimg;
     sdata.drift=[xd, yd];

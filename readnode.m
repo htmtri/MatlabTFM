@@ -12,8 +12,10 @@ function nodev=readnode(filn,nshead,hdhils,nodesz,cols)
 % nodesz is the number of data lines per section
 % cols is the number of colunmns in the data
 %% Qi Wen Feb/2012
-copyfile(filn,'tempf');
-a=fopen('tempf','r');
+%% Minh Sep 2019 - randomly generate name for parallel workers
+tempf = randseq(12);
+copyfile(filn,tempf);
+a=fopen(tempf,'r');
 block=1;
 ad=[];
 Inputtext=textscan(a,'%s',nshead,'delimiter','\n');
@@ -30,7 +32,7 @@ while (~feof(a))
     block=block+1;
 end
 fclose(a);
-delete('tempf')
+delete(tempf)
 nodev.datab=datab;
 nodev.nodes=ad;
     

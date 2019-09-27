@@ -1,57 +1,26 @@
-function outp=TFM_disp3(varargin)
+function TFM_disp3(samp)
 %%detect bead displacements using PIV  
 % build the rgb image to show before and after load bead distribution
 % Minh 2016 revision: remove NaN disp
 % Minh 2017 revision: recursive run, added mpiv_smooth
-% Minh 2018 revision (ver3): remove all displacement outside (cell boundaries+35px)
-switch nargin
-    case 0
-        disp('Missing inputs')
-        outp=0;
-        return;  
-    case 1
-    outp=varargin{1};
-    nulfimg=outp.nulfimg;
-    loadimg=outp.loadimg;
-    cellTrace=outp.cellTrace;
-    case 2
-    nulfimg=varargin{1};
-    loadimg=varargin{2};
-    a=sum(size(nulfimg)-size(loadimg));
-      if a~=0
-          disp('Images must be the same dimensions')
-          outp=0;
-          return;    
-      end
-    case 3
-    nulfimg=varargin{1};
-    loadimg=varargin{2};
-    cellTrace=varargin{3};
-        a=sum(size(nulfimg)-size(loadimg));
-      if a~=0
-          disp('Images must be the same dimensions')
-          outp=0;
-          return;    
-      end
-    otherwise
-        disp('Too many inputs')
-        outp=0;
-        return;     
-end
+% Minh 2019 revision (ver3): revamp input system, now require the name of .mat file 
+% containing preprocessed data remove all displacement outside (cell boundaries+20px)
 
-cimg(:,:,3)=zeros(size(loadimg));
-tempr=double(loadimg)/(mean(double(loadimg(:)))+5*std(double(loadimg(:))));
-tempg=double(nulfimg)/(mean(double(nulfimg(:)))+5*std(double(nulfimg(:))));
-ids=find(tempr>1);
-tempr(ids)=1;
-ids=find(tempg>1);
-tempg(ids)=1;
+% load([samp,'.mat']);
+
+sdata = load([samp,'.mat']);
+
+cimg(:,:,3)=zeros(size(sdata.loadimg));
+tempr=double(sdata.loadimg)/(mean(double(sdata.loadimg(:)))+5*std(double(sdata.loadimg(:))));
+tempg=double(sdata.nulfimg)/(mean(double(sdata.nulfimg(:)))+5*std(double(sdata.nulfimg(:))));
+tempr(tempr>1)=1;
+tempg(tempg>1)=1;
 cimg(:,:,1)=tempr;
 cimg(:,:,2)=tempg;
 
 
 %PIV code to get the bead displ
-[xi,yi,iu,iv,D]=mpiv(nulfimg,loadimg,32,32,0.5,0.5,11,11,1,'mqd',1,0); %img1,img2,xsize,ysize,xoverlap,yoverlap,xmax,ymax,dt,type,recur,plot
+[xi,yi,iu,iv,D]=mpiv(sdata.nulfimg,sdata.loadimg,32,32,0.5,0.5,11,11,1,'mqd',1,0); %img1,img2,xsize,ysize,xoverlap,yoverlap,xmax,ymax,dt,type,recur,plot
 [iu_f,iv_f,iu_s, iv_s] = mpiv_filter(iu,iv, 2, 3.0, 3, 0); %iu,iv,filter 2= median, std_stray, interpolation, plot
 [iu_i, iv_i] = mpiv_smooth(iu_s, iv_s, 0);
 
@@ -61,19 +30,9 @@ iv_i(isnan(iv_i))=0;
 
 [xm,ym]=meshgrid([min(xi):xi(2)-xi(1):max(xi)],[min(yi):mean(diff(yi)):max(yi)]);
 figure,imshow(cimg,[]);
-hold on, quiver(xm',ym',iu_i,iv_i,'c');
-if exist('cellTrace','var')
-plot(cellTrace(:,1),cellTrace(:,2),'r.')
-else
-title('Please trace the cell outline');
-disp('Please trace the cell outline in the figure');
-[bwc,xc,yc]=roipoly;
-reg=bwlabel(bwc);
-[s,l]=bwboundaries(bwc);
-hold on,plot(s{1}(:,2),s{1}(:,1),'r.')
-cellTrace(:,1)=s{1}(:,2);
-cellTrace(:,2)=s{1}(:,1);     
-end
+hold on, 
+quiver(xm',ym',iu_i,iv_i,'c');
+plot(sdata.cellTrace(:,1),sdata.cellTrace(:,2),'r.')
 hold off
 
 
@@ -82,7 +41,7 @@ hold off
 
 iu_m=iu_i;
 iv_m=iv_i;
-[xdata,ydata,bw,xc,yc]=roipoly(cimg,cellTrace(:,1),cellTrace(:,2));
+[xdata,ydata,bw,xc,yc]=roipoly(cimg,sdata.cellTrace(:,1),sdata.cellTrace(:,2));
 bws=imresize(bw,size(iu'));
 bws=bws';
 ids=find(bws(:)==0);
@@ -92,39 +51,44 @@ drifty=mean(iv_m(ids));
 dispm=sqrt(iu_m(ids).^2+iv_m(ids).^2);
 dnoise=nanstd(dispm);
 
+iu_m=iu_i-driftx;
+iv_m=iv_i-drifty;
+
 %% Autoremove displacement outside cell ROI
-newTrace = expandbw(cellTrace,35);
-[xdata,ydata,bw2,xc,yc]=roipoly(cimg,newTrace(:,1),newTrace(:,2));
+try
+    newTrace = expandBoundary(samp,20);
+    [xdata,ydata,bw2,xc,yc]=roipoly(cimg,newTrace.xTraceOut,newTrace.yTraceOut);
+catch
+   warning('Expand Boundary inceed image bound.') 
+    [xdata,ydata,bw2,xc,yc]=roipoly(cimg,sdata.cellTrace(:,1),sdata.cellTrace(:,2));
+end
 bws=imresize(~bw2,size(iu'));
 iu_m=iu_m.*(1-bws');
 iv_m=iv_m.*(1-bws');
 figure,imshow(cimg,[]);
 hold on, quiver(xm',ym',iu_i,iv_i,'c');
 quiver(xm',ym',iu_m,iv_m,'r');
-if exist('cellTrace','var')
-    plot(cellTrace(:,1),cellTrace(:,2),'r.')
-end
+plot(sdata.cellTrace(:,1),sdata.cellTrace(:,2),'r.')
 hold off
+
 %%
 %remove large displacements in area without beads
 %Selecte polygonal regions where displacement are large but no beads
 removp=input('Do you want to remove bogus displacements? \n [1 (yes), 0 (No)]: ');
-iu_m=iu_i-driftx;
-iv_m=iv_i-drifty;
 while removp==1
     [xdata,ydata,bw,xc,yc]=roipoly;
     bws=imresize(bw,size(iu'));
     iu_m=iu_m.*(1-bws');
     iv_m=iv_m.*(1-bws');
-    figure,imshow(cimg,[]);
-      hold on, quiver(xm',ym',iu_i,iv_i,'c');
-        quiver(xm',ym',iu_m,iv_m,'r');
-        if exist('cellTrace','var')
-          plot(cellTrace(:,1),cellTrace(:,2),'r.')
-        end
-     hold off
-     title('Left click to continue removing, Right click to stop');
-     [x,y,removp]=ginput(1);
+    figure,
+    imshow(cimg,[]);
+    hold on, 
+    quiver(xm',ym',iu_i,iv_i,'c');
+    quiver(xm',ym',iu_m,iv_m,'r');
+    plot(sdata.cellTrace(:,1),sdata.cellTrace(:,2),'r.')
+    hold off
+    title('Left click to continue removing, Right click to stop');
+    [x,y,removp]=ginput(1);
 end
     
 %remove ideally the mean displacements should be 0. This is to remove the
@@ -132,11 +96,13 @@ end
 %riu=iu_m-mean(iu_m(:));
 %riv=iv_m-mean(iv_m(:));
 
-outp.cimg=cimg;
-outp.xgrid=xm';
-outp.ygrid=ym';
-outp.xdisp=iu_m;
-outp.ydisp=iv_m;
-outp.dispnoise=dnoise;
-outp.outcelldisp=dispm;
+sdata.cimg=cimg;
+sdata.xgrid=xm';
+sdata.ygrid=ym';
+sdata.xdisp=iu_m;
+sdata.ydisp=iv_m;
+sdata.dispnoise=dnoise;
+sdata.outcelldisp=dispm;
+
+save([samp,'.mat'],'-struct','sdata')
 

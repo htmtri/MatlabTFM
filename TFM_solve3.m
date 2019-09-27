@@ -31,20 +31,28 @@ else
     return;
 end
 
-load([samp,'.mat']); 
+%init
+sdata=load([samp,'.mat']); 
+xgrid=sdata.xgrid;
+ygrid=sdata.ygrid;
+xdisp=sdata.xdisp;
+ydisp=sdata.ydisp;
+scale=sdata.scale;
+version=sdata.version;
+cellTrace=sdata.cellTrace;
+cimg=sdata.cimg;
+gel=sdata.gel;
+
+homedrive = 'C';
+% version = 170;
+gel.height=100e-6; %40*meshsize; %400.0*scal1;
+gel.length=double(max(xgrid(:)) - min(xgrid(:)))*scale;
+gel.width=double(max(ygrid(:)) - min(ygrid(:)))*scale;
 
 %define meshsize for ansys
 isize=double(max([xgrid(2)-xgrid(1) ygrid(2)-ygrid(1)]));
 meshsize=isize*scale;
 
-sdata=load([samp,'.mat']);
-version=sdata.version;
-
-homedrive = 'C';
-version = 170;
-gel.height=100e-6; %40*meshsize; %400.0*scal1;
-gel.length=double(max(xgrid(:)) - min(xgrid(:)))*scale;
-gel.width=double(max(ygrid(:)) - min(ygrid(:)))*scale;
 
 %write ansys modeling file to generate the nodes
 modelfile=writeAnsysModel(samp,gel,meshsize)

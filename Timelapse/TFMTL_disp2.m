@@ -1,7 +1,7 @@
-function outp=TFMTL_disp(samp)
+function outp=TFMTL_disp2(samp)
 %%detect bead displacements using PIV  
 % build the rgb image to show before and after load bead distribution
-% tic
+tic
 n = 0;
 
 j = input('Enter first frame:');
@@ -9,25 +9,12 @@ k = input('Enter last frame:');
 % j = 1;
 % k = 73;
 
-for i=j:k
+parfor i=j:k
     
-    load([samp,'-T',num2str(i+n),'.mat']);
-    
-%     sdata = load([samp,'-T',num2str(i+n),'.mat']);
-    sdata = matfile([samp,'-T',num2str(i+n),'.mat'],'Writable',true);
-    
-    cimg(:,:,3)=zeros(size(loadimg));
-    tempr=double(loadimg)/(mean(double(loadimg(:)))+5*std(double(loadimg(:))));
-    tempg=double(nulfimg)/(mean(double(nulfimg(:)))+5*std(double(nulfimg(:))));
-    ids=find(tempr>1);
-    tempr(ids)=1;
-    ids=find(tempg>1);
-    tempg(ids)=1;
-    cimg(:,:,1)=tempr;
-    cimg(:,:,2)=tempg;
+    sd = load([samp,'-T',num2str(i+n),'.mat']);
     
     %PIV code to get the bead displ
-    [xi,yi,iu,iv,D]=mpiv(nulfimg,loadimg,36,36,0.5,0.5,11,11,1,'mqd',1,0); %img1,img2,xsize,ysize,xoverlap,yoverlap,xmax,ymax,dt,type,recur,plot
+    [xi,yi,iu,iv,D]=mpiv(sd.nulfimg,sd.loadimg,36,36,0.5,0.5,11,11,1,'mqd',1,0); %img1,img2,xsize,ysize,xoverlap,yoverlap,xmax,ymax,dt,type,recur,plot
     [iu_f,iv_f,iu_s, iv_s] = mpiv_filter(iu,iv, 2, 3.0, 3, 0); %iu,iv,filter 2= median, std_stray, interpolation, plot
     [iu_i, iv_i] = mpiv_smooth(iu_s, iv_s, 0);
     
@@ -35,30 +22,14 @@ for i=j:k
     iu_i(isnan(iu_i))=0;
     iv_i(isnan(iv_i))=0;
     
-    [xm,ym]=meshgrid([min(xi):xi(2)-xi(1):max(xi)],[min(yi):mean(diff(yi)):max(yi)]);
-%     figure,imshow(cimg,[]);
-%     hold on, quiver(xm',ym',iu_i,iv_i,'c');
-%     if exist('cellTrace','var')
-%         plot(cellTrace(:,1),cellTrace(:,2),'r.')
-%     else
-%         title('Please trace the cell outline');
-%         disp('Please trace the cell outline in the figure');
-%         [bwc,xc,yc]=roipoly;
-%         reg=bwlabel(bwc);
-%         [s,l]=bwboundaries(bwc);
-%         hold on,plot(s{1}(:,2),s{1}(:,1),'r.')
-%         cellTrace(:,1)=s{1}(:,2);
-%         cellTrace(:,2)=s{1}(:,1);
-%     end
-%     hold off
-    
-    
+    [xm,ym]=meshgrid(min(xi):xi(2)-xi(1):max(xi),min(yi):mean(diff(yi)):max(yi));
+
     %remove drift. the drift will be taken as the x and y displacements at
     %nodes outside  the cell.
     
     iu_m=iu_i;
     iv_m=iv_i;
-    [xdata,ydata,bw,xc,yc]=roipoly(cimg,cellTrace(:,1),cellTrace(:,2));
+    [xdata,ydata,bw,xc,yc]=roipoly(sd.cimg,sd.cellTrace(:,1),sd.cellTrace(:,2));
     bws=imresize(bw,size(iu'));
     bws=bws';
     ids=find(bws(:)==0);
@@ -74,19 +45,21 @@ for i=j:k
     %% Autoremove displacement outside cell ROI
     newTrace = expandBoundary([samp,'-T',num2str(i+n)],20)
     try
-        [xdata,ydata,bw,xc,yc]=roipoly(cimg,newTrace.xTraceOut,newTrace.yTraceOut);
+        [xdata,ydata,bw,xc,yc]=roipoly(sd.cimg,newTrace.xTraceOut,newTrace.yTraceOut);
     catch
         warning('new trace error - trace outside of image edge')
-        [xdata,ydata,bw,xc,yc]=roipoly(cimg,cellTrace(:,1),cellTrace(:,2));
+        writeerror([samp,'-T',num2str(i+n)],'TFMTL_Disp2:expand boundary error')
+%         [xdata,ydata,bw,xc,yc]=roipoly(sd.cellimg,sd.cellTrace(:,1),sd.cellTrace(:,2));
     end
     bws=imresize(~bw,size(iu'));
     iu_m=iu_m.*(1-bws');
     iv_m=iv_m.*(1-bws');
-%     figure,imshow(cimg,[]);
+%    figure,imshow(cimg,[]);
 %     hold on, quiver(xm',ym',iu_i,iv_i,'c');
 %     quiver(xm',ym',iu_m,iv_m,'r');
 %     if exist('cellTrace','var')
-%         plot(cellTrace(:,1),cellTrace(:,2),'r.')
+%         plot(sd.cellTrace(:,1),sd.cellTrace(:,2),'r.')
+%         plot(newTrace.xTraceOut,newTraceyTraceOut,'w.')
 %     end
 %     hold off
     
@@ -116,24 +89,16 @@ for i=j:k
     %subpixel level shifts between load and nulf images
     %riu=iu_m-mean(iu_m(:));
     %riv=iv_m-mean(iv_m(:));
-    xgrid=xm';
-    ygrid=ym';
-    xdisp=iu_m;
-    ydisp=iv_m;
-    dispnoise=dnoise;
-    outcelldisp=dispm;
-
-
-%     sdata.version=181;
-    sdata.cimg=cimg;
-    sdata.xgrid=xgrid;
-    sdata.ygrid=ygrid;
-    sdata.xdisp=xdisp;
-    sdata.ydisp=ydisp;
-    sdata.dispnoise=dispnoise;
-    sdata.outcelldisp=outcelldisp;
-%     save([samp,'-T',num2str(i+n),'.mat'],'-struct','sdata');
+    sd.xgrid=xm';
+    sd.ygrid=ym';
+    sd.xdisp=iu_m;
+    sd.ydisp=iv_m;
+    sd.dispnoise=dnoise;
+    sd.outcelldisp=dispm;
+    
+    parwritedispimg(samp,i+n,sd.cimg,sd.xgrid,sd.ygrid,sd.xdisp,sd.ydisp,sd.cellTrace);
+    parsavestruct([samp,'-T',num2str(i+n),'.mat'],sd);
     close all
 end
-% toc   
+toc   
 end
