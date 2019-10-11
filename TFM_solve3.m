@@ -42,6 +42,9 @@ version=sdata.version;
 cellTrace=sdata.cellTrace;
 cimg=sdata.cimg;
 gel=sdata.gel;
+outcelldisp=sdata.outcelldisp;
+dispnoise=sdata.dispnoise;
+
 
 homedrive = 'C';
 % version = 170;

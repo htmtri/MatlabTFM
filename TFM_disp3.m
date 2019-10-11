@@ -62,12 +62,14 @@ catch
    warning('Expand Boundary inceed image bound.') 
     [xdata,ydata,bw2,xc,yc]=roipoly(cimg,sdata.cellTrace(:,1),sdata.cellTrace(:,2));
 end
-bws=imresize(~bw2,size(iu'));
-iu_m=iu_m.*(1-bws');
-iv_m=iv_m.*(1-bws');
+xgrid = xm';
+ygrid = ym';
+[in, on] = inpolygon(xgrid,ygrid,xc,yc);
+iu_m(~in & ~on)=0;
+iv_m(~in & ~on)=0;
 figure,imshow(cimg,[]);
 hold on, quiver(xm',ym',iu_i,iv_i,'c');
-quiver(xm',ym',iu_m,iv_m,'r');
+quiver(xgrid,ygrid,iu_m,iv_m,'r');
 plot(sdata.cellTrace(:,1),sdata.cellTrace(:,2),'r.')
 hold off
 
@@ -77,14 +79,14 @@ hold off
 removp=input('Do you want to remove bogus displacements? \n [1 (yes), 0 (No)]: ');
 while removp==1
     [xdata,ydata,bw,xc,yc]=roipoly;
-    bws=imresize(bw,size(iu'));
-    iu_m=iu_m.*(1-bws');
-    iv_m=iv_m.*(1-bws');
+    [in, on] = inpolygon(xgrid,ygrid,xc,yc);
+    iu_m(~in & ~on)=0;
+    iv_m(~in & ~on)=0;
     figure,
     imshow(cimg,[]);
     hold on, 
     quiver(xm',ym',iu_i,iv_i,'c');
-    quiver(xm',ym',iu_m,iv_m,'r');
+    quiver(xgrid,ygrid,iu_m,iv_m,'r');
     plot(sdata.cellTrace(:,1),sdata.cellTrace(:,2),'r.')
     hold off
     title('Left click to continue removing, Right click to stop');
@@ -97,8 +99,8 @@ end
 %riv=iv_m-mean(iv_m(:));
 
 sdata.cimg=cimg;
-sdata.xgrid=xm';
-sdata.ygrid=ym';
+sdata.xgrid=xgrid;
+sdata.ygrid=ygrid;
 sdata.xdisp=iu_m;
 sdata.ydisp=iv_m;
 sdata.dispnoise=dnoise;

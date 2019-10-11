@@ -43,17 +43,22 @@ parfor i=j:k
     iv_m=iv_i-drifty;
     
     %% Autoremove displacement outside cell ROI
-    newTrace = expandBoundary([samp,'-T',num2str(i+n)],20)
     try
+		newTrace = expandBoundary([samp,'-T',num2str(i+n)],20)
         [xdata,ydata,bw,xc,yc]=roipoly(sd.cimg,newTrace.xTraceOut,newTrace.yTraceOut);
     catch
         warning('new trace error - trace outside of image edge')
         writeerror([samp,'-T',num2str(i+n)],'TFMTL_Disp2:expand boundary error')
 %         [xdata,ydata,bw,xc,yc]=roipoly(sd.cellimg,sd.cellTrace(:,1),sd.cellTrace(:,2));
     end
-    bws=imresize(~bw,size(iu'));
-    iu_m=iu_m.*(1-bws');
-    iv_m=iv_m.*(1-bws');
+	
+	xgrid = xm';
+	ygrid = ym';
+	
+	[in, on] = inpolygon(xgrid,ygrid,xc,yc);
+	iu_m(~in & ~on)=0;
+	iv_m(~in & ~on)=0;
+	
 %    figure,imshow(cimg,[]);
 %     hold on, quiver(xm',ym',iu_i,iv_i,'c');
 %     quiver(xm',ym',iu_m,iv_m,'r');
@@ -89,8 +94,8 @@ parfor i=j:k
     %subpixel level shifts between load and nulf images
     %riu=iu_m-mean(iu_m(:));
     %riv=iv_m-mean(iv_m(:));
-    sd.xgrid=xm';
-    sd.ygrid=ym';
+    sd.xgrid=xgrid;
+    sd.ygrid=ygrid;
     sd.xdisp=iu_m;
     sd.ydisp=iv_m;
     sd.dispnoise=dnoise;
