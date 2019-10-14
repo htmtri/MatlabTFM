@@ -40,14 +40,13 @@ ydisp=sdata.ydisp;
 scale=sdata.scale;
 version=sdata.version;
 cellTrace=sdata.cellTrace;
-cimg=sdata.cimg;
-gel=sdata.gel;
 outcelldisp=sdata.outcelldisp;
 dispnoise=sdata.dispnoise;
-
+cimg=sdata.cimg;
+gel=sdata.gel;
 
 homedrive = 'C';
-% version = 170;
+version = 170;
 gel.height=100e-6; %40*meshsize; %400.0*scal1;
 gel.length=double(max(xgrid(:)) - min(xgrid(:)))*scale;
 gel.width=double(max(ygrid(:)) - min(ygrid(:)))*scale;
@@ -83,14 +82,14 @@ nlist=m.nodes;
 xn=nlist(:,2)+xgrid(1)*scale; yn=nlist(:,3)+ygrid(1)*scale;
 dxn=interp2(xgrid'*scale,ygrid'*scale,xdisp'*scale,xn,yn);
 dyn=interp2(xgrid'*scale,ygrid'*scale,ydisp'*scale,xn,yn);
-ids=find(isnan(dxn));
-dxn(ids)=0;
-ids=find(isnan(dyn));
-dyn(ids)=0;
+dxn(isnan(dxn))=0;
+dyn(isnan(dyn))=0;
 
 %find the nodal displacement 1 standard deviations larger than noise level
 dispmags=sqrt(dxn.^2+dyn.^2);
-realids=find(dispmags>(mean(outcelldisp)+0.25*dispnoise)*scale);
+realids=find(dispmags>dispnoise*scale);
+% realids=find(dispmags>(mean(outcelldisp)+0.25*dispnoise)*scale);
+num_node=length(realids);
 
 %find nodes inside cell
 xcell=(cellTrace(:,1))*scale;
@@ -98,10 +97,17 @@ ycell=(cellTrace(:,2))*scale;
 Incell=inpolygon(xn,yn,xcell,ycell);
 index_cell=find(Incell==1);
 num_innode=size(index_cell,1);
-%number of nodes will be asigned with displacements for ansys
-num_node=length(realids);
-xpos=xn(index_cell); ypos=yn(index_cell);
-xdispl=dxn(index_cell);ydispl=dyn(index_cell);
+
+%find nodes with real displacement and inside cell
+realindex=intersect(index_cell,realids);
+num_realindex=size(realindex,1);
+
+%real displacement condition check
+if num_realindex < 0.1*num_innode
+    warning('Number of real displacement nodes is too low')
+    writeerror(samp,['Number of real displacement nodes is too low. num_innode = ', ...
+        num2str(num_innode),' num_realnode = ',num2str(num_realindex)])
+end
 
 figure
 imshow(cimg,[])
@@ -126,7 +132,7 @@ sdata.ynode=yn;
 sdata.dxn=dxn;
 sdata.dyn=dyn;
 sdata.meshsize=meshsize;
-sdata.dispids=realids
+sdata.dispids=realids;
 save([samp,'.mat'],'-struct','sdata');
 
 % CHANGE BOUNDARY CONTRAINT TO YOUR LIKING: 0: accept all nodes, 1: only
@@ -134,13 +140,13 @@ save([samp,'.mat'],'-struct','sdata');
 if boundary_constraint == 1
     %  Making displacement table for AYSYS (only nodes within cell are
     % assigned displacements)
-    B=[[1:length(index_cell)]' (nlist(index_cell,1)) xpos ypos xdispl ydispl];
-    B(2:length(index_cell)+1,:)=B(1:length(index_cell),:);
+    B=[[1:length(realindex)]' (nlist(realindex,1)) xn(realindex) yn(realindex) dxn(realindex) dyn(realindex)];
+    B(2:length(realindex)+1,:)=B(1:length(realindex),:);
     B(1,:)=[0:5];
     format shortG;
     dlmwrite([samp,'load.txt'],B,'\t');
     % Making ansys input text file for ansy - to apply the load on top
-    solvfiln=WriteAnsysSolver(samp,gel,meshsize,num_innode)
+    solvfiln=WriteAnsysSolver(samp,gel,meshsize,num_realindex)
     
 elseif boundary_constraint == 0
     % Making displacement table for AYSYS (all nodes on the top layer are

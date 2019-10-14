@@ -89,6 +89,7 @@ reg=bwlabel(bwc);
 [s,l]=bwboundaries(bwc);
 g=regionprops(l,'PixelList','Area');
 Cell_Area=g.Area;
+AspectRatio=g.MajorAxisLength./g.MinorAxisLength;
 hold on,plot(s{1}(:,2),s{1}(:,1),'r.')
 hold off
 cellx=s{1}(:,2);
@@ -152,6 +153,7 @@ out.rectd=recs;
 out.drift=[xd, yd];
 out.scale=scal1;
 out.CellArea=Cell_Area;
+out.AspectRatio=AspectRatio;
 out.cellTrace=[cellx celly];
 out.gel=gel;
 out.version=version;

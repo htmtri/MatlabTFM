@@ -41,7 +41,30 @@ hold off
 
 iu_m=iu_i;
 iv_m=iv_i;
-[xdata,ydata,bw,xc,yc]=roipoly(cimg,sdata.cellTrace(:,1),sdata.cellTrace(:,2));
+
+try
+    newTrace = expandBoundary(samp,20);
+    [xdata,ydata,bw,xc,yc]=roipoly(cimg,newTrace.xTraceOut,newTrace.yTraceOut);
+catch
+   warning('Expand Boundary exceed image bound. Please draw boundary manually: ')
+   
+   figure, 
+   imshow(sdata.cellimg,[])
+   title('Please trace the loose outline aound cell');
+   disp('Please trace the loose outline around in the figure');
+   [bw,xc,yc]=roipoly;
+   [s,l]=bwboundaries(bw);
+   cellxl=s{1}(:,2);
+   cellyl=s{1}(:,1);
+   figure,
+   imshow(sdata.cellimg,[])
+   hold on,
+   plot(sdata.cellTrace(:,1),sdata.cellTrace(:,2),'r.')
+   plot(cellxl,cellyl,'m.')
+   hold off
+   
+end
+
 bws=imresize(bw,size(iu'));
 bws=bws';
 ids=find(bws(:)==0);
@@ -55,23 +78,12 @@ iu_m=iu_i-driftx;
 iv_m=iv_i-drifty;
 
 %% Autoremove displacement outside cell ROI
-try
-    newTrace = expandBoundary(samp,20);
-    [xdata,ydata,bw2,xc,yc]=roipoly(cimg,newTrace.xTraceOut,newTrace.yTraceOut);
-catch
-   warning('Expand Boundary inceed image bound.') 
-    [xdata,ydata,bw2,xc,yc]=roipoly(cimg,sdata.cellTrace(:,1),sdata.cellTrace(:,2));
-end
+
 xgrid = xm';
 ygrid = ym';
 [in, on] = inpolygon(xgrid,ygrid,xc,yc);
 iu_m(~in & ~on)=0;
 iv_m(~in & ~on)=0;
-figure,imshow(cimg,[]);
-hold on, quiver(xm',ym',iu_i,iv_i,'c');
-quiver(xgrid,ygrid,iu_m,iv_m,'r');
-plot(sdata.cellTrace(:,1),sdata.cellTrace(:,2),'r.')
-hold off
 
 %%
 %remove large displacements in area without beads
@@ -92,7 +104,26 @@ while removp==1
     title('Left click to continue removing, Right click to stop');
     [x,y,removp]=ginput(1);
 end
-    
+
+%real disp defined as having snr larger than snr outside cell
+dispmags = sqrt(iu_m.^2+iv_m.^2);
+realdisp=find(dispmags>dnoise);
+% realdisp=find(dispmags./dnoise>(mean(dispm)./dnoise));
+
+if length(realdisp) < 0.1*length(find(in==1))
+    warning('Number of real displacement nodes is too low')
+end
+
+A = figure();
+imshow(cimg,[]);
+hold on, 
+quiver(xm',ym',iu_i,iv_i,'c');
+quiver(xgrid(realdisp),ygrid(realdisp),iu_m(realdisp),iv_m(realdisp),'g');
+quiver(xgrid,ygrid,iu_m,iv_m,'r');
+plot(sdata.cellTrace(:,1),sdata.cellTrace(:,2),'r.')
+hold off
+saveas(A,[samp,'rawdisp'],'png')
+
 %remove ideally the mean displacements should be 0. This is to remove the
 %subpixel level shifts between load and nulf images
 %riu=iu_m-mean(iu_m(:));
