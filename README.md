@@ -47,7 +47,8 @@ Requires no input parameters. This function asks for:
 	- ANSYS information
 	- name of the save file
 output: struct file containing images,gel,ansys information.
-	
+ - TFM_Prep2(): Removed redundant images writeout, added bandpass filter for beads imgs, added several addition information to the output struct file.
+ 
  - TFM_disp(in1): using PIV to compare loaded and null force beads imgs to get the displacement field.
 input: struct file created from TFM_Prep(). This function will call mpiv to perform cross correlation between loaded and null images.
 By the end of PIV it will ask for bogus displacement removal. Look at the overlay image between loaded and null to verify true/false displacement detected.
@@ -55,17 +56,19 @@ By the end of PIV it will ask for bogus displacement removal. Look at the overla
 output: add piv information to the struct file.
 ***Note: TFM_disp and TFM_disp2 will not autosave the resultant displacement in the struct file. Manually save using save('filename.mat','-struct','ans').
 
- - TFM_disp3(in2): 
+ - TFM_disp3(in1): added auto/manual boundary expand for noise calculation of regions surrounding cells. Autosave result and ouput an overlay beads image with raw displacement, dedrifted displacement and filtered displacement.If the number of filtered nodes is smaller than the 10% of the number of nodes inside the cell, the code will print a warning.
 
  - TFM_solve(in1): Get ANSYS model and solving command
 input: name of the output file. Contruct ANSYS model file for the ECM and create nodes for FEM solving.
 output: ANSYS model/solver/log files and ANSYS call cmd (.bat) file. Execute .bat file to call ANSYS to solve for traction stress.
 (ver2 include option to solve only for nodes inside ROI rather than the whole map).
 
+ - TFM_solve3(in1,varargin): included varargin for boundary condition, added noise filter for boundary solving method; optimized variables/indexes for parallel run. If the number of filtered nodes is smaller than the 10% of the number of nodes inside the cell, the code will print a warning and output the error file detailing number of filtered nodes and inner nodes. 
+
  - TFM_Plot(in1): Plot result
 input: name of the output file. Read ANSYS output. Plot result displacement and stressmap.
 output: add stress, force result to struct file.
-(ver2 include more calculated data and more plots. ver3 include reconstruction of displacement from stress and reaction force from contractile stress) 
+(ver2 include more calculated data and more plots. ver3 include reconstruction of displacement from stress and reaction force from contractile stress. ver4 add a switch for debugging by comparing displacement output of ANSYS and PIV) 
 ***Note: readnode() in TFM_plot does not handle empty cell well (which is somtimes spitted out by Ansys solving for 'close to nulled' displacement field)  
 
 ## Module 2: Timelapse TFM
@@ -104,8 +107,6 @@ PanoTFM
 # Acknowledgement
 
 Special thanks to:
-	 - Professor Qi Wen - the original author of static TFM code https://www.wpi.edu/people/faculty/qwen
-	 - Nobuhito Mori and Kuang-An Chang for MPIV module (especially for the implementation of MQD) 
-	 http://www.oceanwave.jp/softwares/mpiv_doc/index.html
-	 - Daniel Blair and Eric Dufresne for implementation of PT_IDL code with image filter in Matlab 
-	 http://site.physics.georgetown.edu/matlab/
+ - Professor Qi Wen - the original author of static TFM code https://www.wpi.edu/people/faculty/qwen
+ - Nobuhito Mori and Kuang-An Chang for MPIV module (especially for the implementation of MQD) http://www.oceanwave.jp/softwares/mpiv_doc/index.html
+ - Daniel Blair and Eric Dufresne for implementation of PT_IDL code with image filter in Matlab http://site.physics.georgetown.edu/matlab/
