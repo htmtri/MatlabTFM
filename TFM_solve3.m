@@ -87,7 +87,7 @@ dyn(isnan(dyn))=0;
 
 %find the nodal displacement 1 standard deviations larger than noise level
 dispmags=sqrt(dxn.^2+dyn.^2);
-realids=find(dispmags>dispnoise*scale);
+realids=find(dispmags>0.5*dispnoise*scale);
 % realids=find(dispmags>(mean(outcelldisp)+0.25*dispnoise)*scale);
 num_node=length(realids);
 

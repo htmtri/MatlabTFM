@@ -5,7 +5,7 @@ function TFM_disp3(samp)
 % Minh 2017 revision: recursive run, added mpiv_smooth
 % Minh 2019 revision (ver3): revamp input system, now require the name of .mat file 
 % containing preprocessed data remove all displacement outside (cell boundaries+20px)
-
+% search range is now defaulted to 0.5*windows_size in PIV
 % load([samp,'.mat']);
 
 sdata = load([samp,'.mat']);
@@ -18,9 +18,12 @@ tempg(tempg>1)=1;
 cimg(:,:,1)=tempr;
 cimg(:,:,2)=tempg;
 
+windows_size = 32;
+p_search = 1/3;
+search_range = ceil(p_search*windows_size);
 
 %PIV code to get the bead displ
-[xi,yi,iu,iv,D]=mpiv(sdata.nulfimg,sdata.loadimg,32,32,0.5,0.5,11,11,1,'mqd',1,0); %img1,img2,xsize,ysize,xoverlap,yoverlap,xmax,ymax,dt,type,recur,plot
+[xi,yi,iu,iv,D]=mpiv(sdata.nulfimg,sdata.loadimg,windows_size,windows_size,0.5,0.5,search_range,search_range,1,'mqd',1,0); %img1,img2,xsize,ysize,xoverlap,yoverlap,xmax,ymax,dt,type,recur,plot
 [iu_f,iv_f,iu_s, iv_s] = mpiv_filter(iu,iv, 2, 3.0, 3, 0); %iu,iv,filter 2= median, std_stray, interpolation, plot
 [iu_i, iv_i] = mpiv_smooth(iu_s, iv_s, 0);
 
@@ -43,11 +46,14 @@ iu_m=iu_i;
 iv_m=iv_i;
 
 try
-    newTrace = expandBoundary(samp,20);
+    newTrace = expandBoundary(samp,30);
     [xdata,ydata,bw,xc,yc]=roipoly(cimg,newTrace.xTraceOut,newTrace.yTraceOut);
+    retrace = input('Do you want to retrace? (1: yes, 0:no): ');
 catch
    warning('Expand Boundary exceed image bound. Please draw boundary manually: ')
-   
+   retrace = 1;
+end
+if retrace == 1
    figure, 
    imshow(sdata.cellimg,[])
    title('Please trace the loose outline aound cell');
@@ -62,9 +68,7 @@ catch
    plot(sdata.cellTrace(:,1),sdata.cellTrace(:,2),'r.')
    plot(cellxl,cellyl,'m.')
    hold off
-   
 end
-
 bws=imresize(bw,size(iu'));
 bws=bws';
 ids=find(bws(:)==0);
@@ -82,8 +86,17 @@ iv_m=iv_i-drifty;
 xgrid = xm';
 ygrid = ym';
 [in, on] = inpolygon(xgrid,ygrid,xc,yc);
-iu_m(~in & ~on)=0;
-iv_m(~in & ~on)=0;
+[inc, onc] = inpolygon(xgrid,ygrid,sdata.cellTrace(:,1),sdata.cellTrace(:,2));
+iu_m(~in & ~on & ~inc & ~onc)=0;
+iv_m(~in & ~on & ~inc & ~onc)=0;
+
+figure,
+imshow(cimg,[]);
+hold on,
+quiver(xm',ym',iu_i,iv_i,'c');
+quiver(xgrid,ygrid,iu_m,iv_m,'r');
+plot(sdata.cellTrace(:,1),sdata.cellTrace(:,2),'r.')
+hold off
 
 %%
 %remove large displacements in area without beads
@@ -92,8 +105,8 @@ removp=input('Do you want to remove bogus displacements? \n [1 (yes), 0 (No)]: '
 while removp==1
     [xdata,ydata,bw,xc,yc]=roipoly;
     [in, on] = inpolygon(xgrid,ygrid,xc,yc);
-    iu_m(~in & ~on)=0;
-    iv_m(~in & ~on)=0;
+    iu_m(in)=0;
+    iv_m(in)=0;
     figure,
     imshow(cimg,[]);
     hold on, 
@@ -107,7 +120,7 @@ end
 
 %real disp defined as having snr larger than snr outside cell
 dispmags = sqrt(iu_m.^2+iv_m.^2);
-realdisp=find(dispmags>dnoise);
+realdisp=find(dispmags>0.5*dnoise);
 % realdisp=find(dispmags./dnoise>(mean(dispm)./dnoise));
 
 if length(realdisp) < 0.1*length(find(in==1))
