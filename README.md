@@ -26,6 +26,12 @@ traction force microscopy. Methods in Cell Biology, volume 123, 2014
 
 # Usage
 
+## Requirement
+Matlab 2014b or above (including Image Processing, Curve Fitting, Signal Processing and Bioinformatics toolboxes) 
+ANSYS Mechanical APDL 13.0 or above 
+mpiv toobox for PIV analysis - http://www.oceanwave.jp/softwares/mpiv/
+DACE (Matlab Kriging Toolbox) for advanced interpolations - http://www2.imm.dtu.dk/~hbn/dace/
+
 ## Algorithm: 
 	- Crop area of interest
 	- Adjust loaded and null images to compensate for drifting effect
@@ -63,7 +69,7 @@ input: name of the output file. Contruct ANSYS model file for the ECM and create
 output: ANSYS model/solver/log files and ANSYS call cmd (.bat) file. Execute .bat file to call ANSYS to solve for traction stress.
 (ver2 include option to solve only for nodes inside ROI rather than the whole map).
 
- - TFM_solve3(in1,varargin): included varargin for boundary condition, added noise filter for boundary solving method; optimized variables/indexes for parallel run. If the number of filtered nodes is smaller than the 10% of the number of nodes inside the cell, the code will print a warning and output the error file detailing number of filtered nodes and inner nodes. 
+ - TFM_solve3(in1,varargin): included varargin for boundary condition, added noise filter for boundary solving method; optimized variables/indexes for parallel run. If the number of filtered nodes is smaller than the a threshold number of nodes inside the cell, the code will print a warning and output the error file detailing number of filtered nodes and inner nodes. 
 
  - TFM_Plot(in1): Plot result
 input: name of the output file. Read ANSYS output. Plot result displacement and stressmap.
