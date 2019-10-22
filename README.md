@@ -96,7 +96,8 @@ output: add stress, force result to struct file.
 
 - TFMTL_disp2(argin1) - parallel
 
-- TFMTL_solve(argin1)
+- TFMTL_solve(argin1) - 
+***Note: ANSYS is instructed to used upto 24 cores for solving a single cell's mesh (cannot parallel run multiple cells)
 
 - TFMTL_Note(argin1)
 
@@ -104,8 +105,6 @@ output: add stress, force result to struct file.
 
 - TFMTL_Plot2(argin1) - parallel
 
-*** Todo: Adapt code for parallel PIV to reduce time. Problem: matfile parallel save. Read https://www.mathworks.com/matlabcentral/answers/307763-how-to-update-variable-within-a-matfile-inside-a-parfor-loop 
-*** Possible for ANSYS parallel analysis??
 
 ## Module 3: Paranoma TFM
 
