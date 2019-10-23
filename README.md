@@ -27,7 +27,7 @@ traction force microscopy. Methods in Cell Biology, volume 123, 2014
 # Usage
 
 ## Requirement
-Matlab 2014b or above (including Image Processing, Curve Fitting, Signal Processing and Bioinformatics toolboxes) 
+Matlab 2014b or above (including Image Processing, Curve Fitting, Signal Processing, Parallel Computing and Bioinformatics toolboxes) 
 
 ANSYS Mechanical APDL 13.0 or above 
 
