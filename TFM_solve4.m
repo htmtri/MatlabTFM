@@ -46,7 +46,7 @@ cimg=sdata.cimg;
 gel=sdata.gel;
 
 homedrive = 'C';
-version = 170;
+%version = 170;
 gel.height=100e-6; %40*meshsize; %400.0*scal1;
 gel.length=double(max(xgrid(:)) - min(xgrid(:)))*scale;
 gel.width=double(max(ygrid(:)) - min(ygrid(:)))*scale;

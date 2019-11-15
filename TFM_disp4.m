@@ -120,7 +120,7 @@ quiver(xm',ym',iu_i,iv_i,'c');
 quiver(xgrid,ygrid,iu_m,iv_m,'r');
 plot(sdata.cellTrace(:,1),sdata.cellTrace(:,2),'r.')
 if isfield(sdata,'numCells')    
-    for i=1:length(indCellArea)
+    for i=1:length(sdata.indCellArea)
         plot(sdata.indCellTrace{i}(:,1),sdata.indCellTrace{i}(:,2),'LineWidth',1.2) 
     end
 end

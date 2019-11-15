@@ -70,8 +70,11 @@ if rect(2)+yd+rect(4)<size(b,1)
     csimg(:,:,3)=zeros(size(nulfimg));
     close all;
 
-    cluster = input('Is this a colony (1:yes, 0:no)? ')
+    cluster = logical(input('Is this a colony (1:yes, 0:no)? '))
+
     if cluster == 1
+        figure, imshow(cellimg,[])
+        title('Please count number of cells')
         numcells = input('Enter number of cells: ')
     end
 
