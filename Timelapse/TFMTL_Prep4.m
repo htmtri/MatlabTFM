@@ -33,7 +33,7 @@ parfor i = 1:NumberImages
     
     %     a_org=imread(FinalImage(:,:,i));
     a_org=FinalImage(:,:,i);
-    a = bpass(a_org,0,7,0.05*mode(a_org(:)));
+    a = bpassTF(a_org,0,7,0.05*mode(a_org(:)));
     
     loadimg=imcrop(a,rect);
     
