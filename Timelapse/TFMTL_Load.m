@@ -4,8 +4,8 @@ function out=TFMTL_Load(samp)
 % uses notepad to edit
 
 n = 0;
-init = 1;
-fin = 30;
+init = input('Enter first frame:');
+fin = input('Enter last frame:');
 
 
 for i = [init:fin]
