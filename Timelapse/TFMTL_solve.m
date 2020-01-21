@@ -7,6 +7,9 @@ function outp=TFMTL_solve(samp)
 
 n = 0;
 
+j = input('Enter first frame:');
+k = input('Enter last frame:');
+
 ver=input('Reenter ANSYS version: ');
 if isempty(ver)
     ver=182
@@ -22,7 +25,7 @@ if isempty(boundary_constraint)
     boundary_constraint = 1;
 end
 
-for i = [1:30]
+for i = j:k
     
     load([samp,'-T',num2str(i+n),'.mat']);
     homedrive = 'C';
