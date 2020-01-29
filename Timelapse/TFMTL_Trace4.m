@@ -4,12 +4,12 @@ function out=TFMTL_Trace4(varargin)
 prefd=varargin{1} % name of the sample
 
 %define region enclosing the cell (for ALL timelapse img)
-rect=[248.7500  177.7500  862.5000  640.5000]
+rect=[489.0000  227.0000  511.0000  415.0000]
 rect(3)=(round(rect(3)/32)+1)*32-1;
 rect(4)=(round(rect(4)/32)+1)*32-1;
 
 %define region far away from the cell (for ALL timelapse img)
-recs=[340.2500  686.2500  159.0000  153.0000]
+recs=[300.0000  712.0000  191.0000  159.0000]
 recs(3)=(round(recs(3)/32)+1)*32-1;
 recs(4)=(round(recs(4)/32)+1)*32-1;
 
@@ -19,13 +19,16 @@ mImage=InfoImage(1).Width;
 nImage=InfoImage(1).Height;
 NumberImages=length(InfoImage);
 FinalImage=zeros(nImage,mImage,NumberImages,'uint16');
+StackImage=zeros(nImage,mImage,'uint16');
 
 TifLink = Tiff(FileTif, 'r');
 for i=1:NumberImages
     TifLink.setDirectory(i);
     FinalImage(:,:,i)=TifLink.read();
+	StackImage=StackImage+FinalImage(:,:,i);
 end
 TifLink.close();
+StackImage=StackImage./NumberImages;
 
 cond = input('Do you want to look through tiff stack to get ROI? \n [1 (yes), 0 (No)]: ');
 if cond == 1
@@ -39,12 +42,16 @@ end
 
 cond2 = input('Are you ready to define ROI? \n [1 (yes), 0 (No)]: ');
 if cond2 == 1
-    imshow(FinalImage(:,:,NumberImages),[])
+    figure, imshow(StackImage,[0 0.8*max(StackImage(:))])
+    title('Please select region enclosing the cell');
     disp('Please select region enclosing the cell')
     rect = round(getrect)
     rect(3)=(round(rect(3)/32)+1)*32-1;
     rect(4)=(round(rect(4)/32)+1)*32-1;
-    disp('Please select region without cell')
+    
+    figure, imshow(StackImage,[0 0.8*max(StackImage(:))])
+    title('Please select region without cells');
+    disp('Please select region without cells')
     recs = round(getrect)
     recs(3)=(round(recs(3)/32)+1)*32-1;
     recs(4)=(round(recs(4)/32)+1)*32-1;
