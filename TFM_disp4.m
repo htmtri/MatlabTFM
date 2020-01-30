@@ -64,8 +64,14 @@ iv_m=iv_i;
 
 if gel.E > 5000
     try
-        newTrace = expandBoundary(samp,30);
+        newTrace = moveBoundary(samp,50);
         [xdata,ydata,bw,xc,yc]=roipoly(cimg,newTrace.xTraceOut,newTrace.yTraceOut);
+        figure,imshow(cimg,[]);
+        hold on, 
+        quiver(xm',ym',iu_i,iv_i,'c');
+        plot(sdata.cellTrace(:,1),sdata.cellTrace(:,2),'r.')
+        plot(newTrace.xTraceOut,newTrace.yTraceOut,'m-')
+        hold off
         retrace = input('Do you want to retrace? (1: yes, 0:no): ');
     catch
        warning('Expand Boundary exceed image bound. Please draw boundary manually: ')

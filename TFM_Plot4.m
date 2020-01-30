@@ -67,8 +67,8 @@ D2=sqrt((Dxn).^2+(Dyn).^2);
 Avgdisp=mean(D1);
 Avgdispsol=mean(D2);
 
-%StrainEnergy
-SE = Area.*sum(sdata.dxn.*sxz + sdata.dyn.*syz)/2;
+%StrainEnergyDensity
+SE = sum(Area.*(sdata.dxn.*sxz + sdata.dyn.*syz))/2;
 %Traction Moment
 mtrs=[sum(xnn.*sxz) (sum(xnn.*syz)+sum(ynn.*sxz))/2;(sum(xnn.*syz)+sum(ynn.*sxz))/2 sum(ynn.*syz)]*Area;
 [D, W]=eig(mtrs);

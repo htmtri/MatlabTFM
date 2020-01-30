@@ -1,6 +1,6 @@
 %% Expand the boundary created by roipoly by input pixel. Input: (old boundary,pixel)
 %% Output: new boundary
-function outp=expandbw(varargin)
+function outp=expandBoundary(varargin)
 % load('Trace.mat');
 if nargin ~= 2
     disp('Not enough argument')
