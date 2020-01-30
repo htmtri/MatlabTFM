@@ -44,7 +44,7 @@ parfor i=j:k
     
     %% Autoremove displacement outside cell ROI
     try
-		newTrace = expandBoundary([samp,'-T',num2str(i+n)],20)
+		newTrace = moveBoundary([samp,'-T',num2str(i+n)],30)
         [xdata,ydata,bw,xc,yc]=roipoly(sd.cimg,newTrace.xTraceOut,newTrace.yTraceOut);
     catch
         warning('new trace error - trace outside of image edge')
